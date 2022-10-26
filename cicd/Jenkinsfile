@@ -1,0 +1,50 @@
+def version = ""
+pipeline {
+  agent {
+    label "node"
+  }
+  parameters {
+    string(name: 'versionprefix', defaultValue: '1.0.', description: 'Mention version prefix. This will be appended with build number')
+  }
+  stages {
+    stage("Init") {
+      steps {
+        script {
+          version = "${params.versionprefix}.${currentBuild.number}"
+          currentBuild.displayName = version
+
+          git branch: '$BRANCH_NAME',
+              credentialsId: '12345-1234-4696-af25-123455',
+              url: 'ssh://git@bitbucket.org:company/repo.git'
+        }
+      }
+    }
+    stage("Package") {
+      steps {
+        script {
+          sh """
+            mkdir ${version} &&
+            cp -r -f ./data ./${version}/ &&
+            cp -r -f ./ui ./${version}/ &&
+            cp -r -f ./Utils ./${version}/ &&
+            cp -r -f ./config.json ./${version}/ &&
+            cp -r -f ./server.py ./${version}/ &&
+            cp -r -f ./cicd/install.py ./${version}/ &&
+            zip -r package.zip ./${version}
+          """
+        }
+      }
+    }
+  }
+  post {
+    always {
+      echo "========always========"
+    }
+    success {
+      echo "========pipeline executed successfully ========"
+    }
+    failure {
+      echo "========pipeline execution failed========"
+    }
+  }
+}

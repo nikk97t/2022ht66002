@@ -1,0 +1,7 @@
+[run]
+omit = *tests*
+include = Utils/*, server.py
+
+[report]
+omit = *tests*
+include = Utils/*, server.py

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/webui/leaflet/leaflet.css">
+  <link rel="stylesheet" href="/webui/css/map1.css">
+  <title>2022ht66002 - map project</title>
+</head>
+<body>
+  <div>
+    <fieldset>
+      <legend>
+        Route finder
+      </legend>
+      From: <select name="from" id="from" onchange="get_direction()">
+        <option value="node1">node1</option>
+      </select> | 
+      To: <select name="to" id="to" onchange="get_direction()">
+        <option value="node2">node2</option>
+      </select>
+      | <span id="status"></span>
+      <hr>
+    </fieldset>
+    <div id="mapview1"></div>
+  </div>
+  <script src="/webui/jquery/jquery.min.js"></script>
+  <script src="/webui/leaflet/leaflet.js"></script>
+  <script src="/webui/js/map1.js"></script>
+</body>
+</html>
