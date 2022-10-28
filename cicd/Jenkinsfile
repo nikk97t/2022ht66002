@@ -10,7 +10,7 @@ pipeline {
     stage("Init") {
       steps {
         script {
-          version = "${params.versionprefix}.${currentBuild.number}"
+          version = "${params.versionprefix}${currentBuild.number}"
           currentBuild.displayName = version
 
           git branch: '$BRANCH_NAME',
