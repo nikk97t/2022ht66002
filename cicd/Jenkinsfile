@@ -1,7 +1,7 @@
 def version = ""
 pipeline {
   agent {
-    label "node"
+    label "slave-1"
   }
   parameters {
     string(name: 'versionprefix', defaultValue: '1.0.', description: 'Mention version prefix. This will be appended with build number')
@@ -14,8 +14,8 @@ pipeline {
           currentBuild.displayName = version
 
           git branch: '$BRANCH_NAME',
-              credentialsId: '12345-1234-4696-af25-123455',
-              url: 'ssh://git@bitbucket.org:company/repo.git'
+              credentialsId: '14642e87-7795-479b-89b7-4203e3dbf83a',
+              url: 'https://github.com/nikk97t/2022ht66002.git'
         }
       }
     }
