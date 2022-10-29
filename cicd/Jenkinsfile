@@ -65,6 +65,7 @@ pipeline {
           sh """
             sudo rm -rf /opt/tnik
             sudo mv ./${version} /opt/tnik
+            cd /opt/tnik
             sudo rm -rf /etc/systemd/system/tnik.service
             sudo cp ./tnik.service /etc/systemd/system/tnik.service
             sudo systemctl daemon-reload
