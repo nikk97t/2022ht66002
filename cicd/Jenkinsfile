@@ -62,10 +62,16 @@ pipeline {
     stage("Deploy") {
       steps {
         script {
+          def env_name = "staging-env"
+          if ('$BRANCH_NAME' == 'main') {
+            env_name = "prod-env"
+          }
           sh """
             sudo rm -rf /opt/tnik
             sudo mv ./${version} /opt/tnik
             cd /opt/tnik
+            sudo sed -i 's|PORT_PLACEHOLDER|5000|g' ./server.sh
+            sudo sed -i 's|ENV_TYPE_PLACEHOLDER|${env_name}|g' ./server.sh
             sudo rm -rf /etc/systemd/system/tnik.service
             sudo cp ./tnik.service /etc/systemd/system/tnik.service
             sudo chmod 777 /opt/tnik -R
