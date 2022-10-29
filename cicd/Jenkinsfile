@@ -13,6 +13,8 @@ pipeline {
           version = "${params.versionprefix}${currentBuild.number}"
           currentBuild.displayName = version
 
+          cleanWs()
+
           git branch: '$BRANCH_NAME',
               credentialsId: '14642e87-7795-479b-89b7-4203e3dbf83a',
               url: 'https://github.com/nikk97t/2022ht66002.git'
