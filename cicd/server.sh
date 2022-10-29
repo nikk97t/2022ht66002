@@ -1,3 +1,5 @@
+#!/bin/bash
+
 . /jenkins/workspace/venv/bin/activate
 
 export PORT=PORT_PLACEHOLDER
