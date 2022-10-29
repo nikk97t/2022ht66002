@@ -88,7 +88,7 @@ def get_direction(fromid, toid):
 def hello_world():
   ret_data = { "status":200, "message":"", "data":{} }
   ret_data["message"] = "Welcome to nikk WebApp for shortest path finder"
-  ret_data["data"]["env"] = os.environ["ENVIRONMENT"]
+  ret_data["data"]["env"] = os.environ["ENVIRONMENT"] if "ENVIRONMENT" in os.environ else "None-Defined"
   return jsonify(ret_data), ret_data["status"]
 
 if __name__ == '__main__':
