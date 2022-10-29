@@ -19,7 +19,7 @@ pipeline {
         }
       }
     }
-    stage("Package") {
+    stage("Build") {
       steps {
         script {
           sh """
@@ -30,7 +30,44 @@ pipeline {
             cp -r -f ./config.json ./${version}/ &&
             cp -r -f ./server.py ./${version}/ &&
             cp -r -f ./cicd/install.py ./${version}/ &&
+            cp -r -f ./cicd/server.sh ./${version}/ &&
+            cp -r -f ./cicd/tnik.service ./${version}/ &&
             zip -r package.zip ./${version}
+          """
+        }
+      }
+    }
+    stage("Package") {
+      steps {
+        script {
+          sh """
+            sudo zip -r package.zip ./${version}
+          """
+        }
+      }
+    }
+    stage("Test") {
+      steps {
+        script {
+          sh """
+            . /jenkins/workspace/venv/bin/activate
+            coverage run -m pytest
+            coverage html
+          """
+        }
+      }
+    }
+    stage("Deploy") {
+      steps {
+        script {
+          sh """
+            sudo rm -rf /opt/tnik
+            sudo mv ./${version} /opt/tnik
+            sudo rm -rf /etc/systemd/system/tnik.service
+            sudo cp ./tnik.service /etc/systemd/system/tnik.service
+            sudo systemctl daemon-reload
+            sudo systemctl restart tnik.service
+            sudo systemctl status tnik.service
           """
         }
       }
@@ -42,6 +79,13 @@ pipeline {
     }
     success {
       echo "========pipeline executed successfully ========"
+      publishHTML (target : [allowMissing: false,
+        alwaysLinkToLastBuild: true,
+        keepAll: true,
+        reportDir: 'htmlcov',
+        reportFiles: 'index.html',
+        reportName: 'Coverage-Test-Report',
+        reportTitles: 'Coverage-Test-Report'])
     }
     failure {
       echo "========pipeline execution failed========"
