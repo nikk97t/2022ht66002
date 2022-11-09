@@ -1,7 +1,8 @@
 import json
-from flask import Flask, jsonify, request, send_file
+import os
 import os.path
 from Utils.Utils1 import read_raw_data, pre_process_data, transform_data_to_mode2, point_id, json_resp
+from flask import Flask, jsonify, request, send_file
 from dijkstar import Graph, find_path
 
 # read config file
@@ -87,6 +88,7 @@ def get_direction(fromid, toid):
 def hello_world():
   ret_data = { "status":200, "message":"", "data":{} }
   ret_data["message"] = "Welcome to nikk WebApp for shortest path finder"
+  ret_data["data"]["env"] = os.environ["ENVIRONMENT"] if "ENVIRONMENT" in os.environ else "None-Defined"
   return jsonify(ret_data), ret_data["status"]
 
 if __name__ == '__main__':

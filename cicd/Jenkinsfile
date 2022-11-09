@@ -1,7 +1,7 @@
 def version = ""
 pipeline {
   agent {
-    label "node"
+    label "slave-1"
   }
   parameters {
     string(name: 'versionprefix', defaultValue: '1.0.', description: 'Mention version prefix. This will be appended with build number')
@@ -10,16 +10,18 @@ pipeline {
     stage("Init") {
       steps {
         script {
-          version = "${params.versionprefix}.${currentBuild.number}"
+          version = "${params.versionprefix}${currentBuild.number}"
           currentBuild.displayName = version
 
+          cleanWs()
+
           git branch: '$BRANCH_NAME',
-              credentialsId: '12345-1234-4696-af25-123455',
-              url: 'ssh://git@bitbucket.org:company/repo.git'
+              credentialsId: '14642e87-7795-479b-89b7-4203e3dbf83a',
+              url: 'https://github.com/nikk97t/2022ht66002.git'
         }
       }
     }
-    stage("Package") {
+    stage("Build") {
       steps {
         script {
           sh """
@@ -30,7 +32,54 @@ pipeline {
             cp -r -f ./config.json ./${version}/ &&
             cp -r -f ./server.py ./${version}/ &&
             cp -r -f ./cicd/install.py ./${version}/ &&
+            cp -r -f ./cicd/server.sh ./${version}/ &&
+            cp -r -f ./cicd/tnik.service ./${version}/ &&
             zip -r package.zip ./${version}
+          """
+        }
+      }
+    }
+    stage("Package") {
+      steps {
+        script {
+          sh """
+            sudo zip -r package.zip ./${version}
+          """
+        }
+      }
+    }
+    stage("Test") {
+      steps {
+        script {
+          sh """
+            . /jenkins/workspace/venv/bin/activate
+            coverage run -m pytest
+            coverage html
+          """
+        }
+      }
+    }
+    stage("Deploy") {
+      steps {
+        script {
+          def env_name = "staging-env"
+          if ('$BRANCH_NAME' == 'main') {
+            env_name = "prod-env"
+          }
+          sh """
+            sudo rm -rf /opt/tnik
+            sudo mv ./${version} /opt/tnik
+            cd /opt/tnik
+            sudo sed -i 's|PORT_PLACEHOLDER|5000|g' ./server.sh
+            sudo sed -i 's|ENV_TYPE_PLACEHOLDER|${env_name}|g' ./server.sh
+            sudo systemctl stop tnik.service
+            sudo rm -rf /etc/systemd/system/tnik.service
+            sudo cp ./tnik.service /etc/systemd/system/tnik.service
+            sudo chmod 777 /opt/tnik -R
+            sudo chmod +x ./*.sh
+            sudo systemctl daemon-reload
+            sudo systemctl restart tnik.service
+            sudo systemctl status tnik.service
           """
         }
       }
@@ -42,6 +91,13 @@ pipeline {
     }
     success {
       echo "========pipeline executed successfully ========"
+      publishHTML (target : [allowMissing: false,
+        alwaysLinkToLastBuild: true,
+        keepAll: true,
+        reportDir: 'htmlcov',
+        reportFiles: 'index.html',
+        reportName: 'Coverage-Test-Report',
+        reportTitles: 'Coverage-Test-Report'])
     }
     failure {
       echo "========pipeline execution failed========"
